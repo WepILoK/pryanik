@@ -77,7 +77,7 @@ export const TablePage = () => {
             headerName: '',
             editable: true,
             type: "date",
-            width: 100,
+            width: 120,
             valueFormatter: (value) => {
                 if (!value) return value
                 return Intl.DateTimeFormat('ru-RU').format(new Date(value))
@@ -105,7 +105,7 @@ export const TablePage = () => {
             field: 'documentType',
             headerName: '',
             editable: true,
-            width: 190,
+            width: 170,
         },
         {
             field: 'employeeNumber',
@@ -117,7 +117,7 @@ export const TablePage = () => {
             field: 'employeeSigDate',
             headerName: '',
             editable: true,
-            width: 100,
+            width: 120,
             type: "date",
             valueFormatter: (value) => {
                 if (!value) return value
@@ -134,7 +134,7 @@ export const TablePage = () => {
             field: 'actions',
             type: 'actions',
             headerName: 'Управление',
-            width: 140,
+            width: 120,
             getActions: ({id}) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 

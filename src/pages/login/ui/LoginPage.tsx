@@ -32,7 +32,7 @@ export const LoginPage = () => {
     }
 
     if(token) {
-        return <Navigate to="/table" replace/>;
+        return <Navigate to="/pryanik" replace/>;
     }
 
     return (

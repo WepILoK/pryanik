@@ -9,6 +9,7 @@ const initialState: ILoginState = {
 export const loginReducer = produce((draft: Draft<ILoginState>, action: ILoginActions) => {
     switch (action.type) {
         case LoginActionsType.SET_TOKEN:
+            localStorage.setItem('token', action.payload)
             draft.token = action.payload
             break;
         default:

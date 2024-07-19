@@ -11,7 +11,6 @@ function* loginUser({payload}: IAuthUser) {
             throw new Error('Доступ запрещен');
         }
         yield put(setToken(token))
-        window.localStorage.setItem('token', data.data.token)
     } catch (error) {
         alert('Ощибка загрузки данных с сервера\n' + error.message)
     }
