@@ -12,7 +12,7 @@ export const tableApi = {
     delete: (id: string): AxiosPromise<TableItemType[]> => {
         return instance.post(`/ru/data/v3/testmethods/docs/userdocs/delete/${id}`);
     },
-    set: ({id, updateItem}: {id: string, updateItem: TableItemType}): AxiosPromise<TableItemType[]> => {
-        return instance.post(`/ru/data/v3/testmethods/docs/userdocs/set/${id}`, updateItem);
+    set: (item: TableItemType): AxiosPromise<TableItemType[]> => {
+        return instance.post(`/ru/data/v3/testmethods/docs/userdocs/set/${item.id}`, item);
     },
 };

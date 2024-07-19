@@ -5,5 +5,5 @@ export const PrivateRoutes = () => {
 
     return localStorageToken
         ? <Outlet />
-        : <Navigate to="/pryanik/login" replace/>;
+        : <Navigate to="/login" replace/>;
 }
