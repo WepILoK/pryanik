@@ -1,2 +1,2 @@
 export * from "./Loader"
-export * from "./MainLayout"
+export * from "./MainLayout/MainLayout.tsx"

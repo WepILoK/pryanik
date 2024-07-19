@@ -19,15 +19,16 @@ import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {selectTableDataState, selectTableStatusState} from "../../model/selectors.ts";
 import {LoadingStatus} from "../../model/types.ts";
-import {deleteTableItemRequest, getTableListRequest} from "../../model/actionCreators.ts";
+import {createTableItemRequest, deleteTableItemRequest, getTableListRequest} from "../../model/actionCreators.ts";
 import {EditToolbar} from "../EditToolbar/EditToolbar.tsx";
+import {TableItemType} from "../../../../shared/api/endpoints/table";
 
 export const TablePage = () => {
-    const [rows, setRows] = useState([]);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const dispatch = useDispatch()
     const loadingStatus = useSelector(selectTableStatusState)
     const data = useSelector(selectTableDataState)
+    const [isCreateItem, setIsCreateItem] = useState(false)
     const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
@@ -35,34 +36,35 @@ export const TablePage = () => {
     };
 
     const handleEditClick = (id: GridRowId) => () => {
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+        setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.Edit}});
     };
 
     const handleSaveClick = (id: GridRowId) => () => {
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+        setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.View}});
     };
 
     const handleDeleteClick = (id: GridRowId) => () => {
         dispatch(deleteTableItemRequest({id: id as string}))
-        setRows(rows.filter((row) => row.id !== id));
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
         setRowModesModel({
             ...rowModesModel,
-            [id]: { mode: GridRowModes.View, ignoreModifications: true },
+            [id]: {mode: GridRowModes.View, ignoreModifications: true},
         });
-
-        const editedRow = rows.find((row) => row.id === id);
-        if (editedRow!.isNew) {
-            setRows(rows.filter((row) => row.id !== id));
-        }
     };
 
-    const processRowUpdate = (newRow: GridRowModel) => {
-        const updatedRow = { ...newRow, isNew: false };
-        setRows(rows.map((row: any[]) => (row.id === newRow.id ? updatedRow : row)));
-        return updatedRow;
+    const processRowUpdate = (newRow: GridRowModel<TableItemType>) => {
+        if (newRow.isNew) {
+            if (newRow.documentName && newRow.documentStatus) {
+                dispatch(createTableItemRequest(newRow))
+                return {...newRow, isNew: false};
+            }
+            setIsCreateItem(false)
+        } else {
+            dispatch(createTableItemRequest(newRow))
+            return {...newRow, isNew: false};
+        }
     };
 
     const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -71,19 +73,15 @@ export const TablePage = () => {
 
     const columns: GridColDef[] = [
         {
-            field: 'id',
-            headerName: 'ID',
-            width: 70,
-        },
-        {
             field: 'companySigDate',
             headerName: '',
             editable: true,
-            // type: "date",
+            type: "date",
+            width: 100,
             valueFormatter: (value) => {
-              console.log(value)
+                if (!value) return value
+                return Intl.DateTimeFormat('ru-RU').format(new Date(value))
             },
-            width: 130,
         },
         {
             field: 'companySignatureName',
@@ -107,7 +105,7 @@ export const TablePage = () => {
             field: 'documentType',
             headerName: '',
             editable: true,
-            width: 130,
+            width: 190,
         },
         {
             field: 'employeeNumber',
@@ -119,8 +117,12 @@ export const TablePage = () => {
             field: 'employeeSigDate',
             headerName: '',
             editable: true,
-            width: 130,
-            // type: "date",
+            width: 100,
+            type: "date",
+            valueFormatter: (value) => {
+                if (!value) return value
+                return Intl.DateTimeFormat('ru-RU').format(new Date(value))
+            },
         },
         {
             field: 'employeeSignatureName',
@@ -132,14 +134,14 @@ export const TablePage = () => {
             field: 'actions',
             type: 'actions',
             headerName: 'Управление',
-            width: 160,
-            getActions: ({ id }) => {
+            width: 140,
+            getActions: ({id}) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
                 if (isInEditMode) {
                     return [
                         <GridActionsCellItem
-                            icon={<SaveIcon />}
+                            icon={<SaveIcon/>}
                             label="Save"
                             sx={{
                                 color: 'primary.main',
@@ -147,7 +149,7 @@ export const TablePage = () => {
                             onClick={handleSaveClick(id)}
                         />,
                         <GridActionsCellItem
-                            icon={<CancelIcon />}
+                            icon={<CancelIcon/>}
                             label="Cancel"
                             className="textPrimary"
                             onClick={handleCancelClick(id)}
@@ -158,14 +160,14 @@ export const TablePage = () => {
 
                 return [
                     <GridActionsCellItem
-                        icon={<EditIcon />}
+                        icon={<EditIcon/>}
                         label="Edit"
                         className="textPrimary"
                         onClick={handleEditClick(id)}
                         color="inherit"
                     />,
                     <GridActionsCellItem
-                        icon={<DeleteIcon />}
+                        icon={<DeleteIcon/>}
                         label="Delete"
                         onClick={handleDeleteClick(id)}
                         color="inherit"
@@ -185,7 +187,6 @@ export const TablePage = () => {
                 rows={data}
                 columns={columns}
                 loading={loadingStatus === LoadingStatus.LOADING}
-                hideFooter
                 showCellRightBorder
                 showColumnRightBorder
                 disableSelectionOnClick
@@ -207,10 +208,11 @@ export const TablePage = () => {
                     toolbar: EditToolbar as GridSlots['toolbar'],
                 }}
                 slotProps={{
-                    toolbar: { setRows, setRowModesModel },
+                    toolbar: {isCreateItem, setIsCreateItem, setRowModesModel},
                 }}
             />
         </TableWrapper>
 
     )
 }
+

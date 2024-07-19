@@ -1,10 +1,12 @@
-import {GridRowModes, GridRowModesModel, GridRowsProp, GridToolbarContainer} from "@mui/x-data-grid";
+import {GridRowModes, GridRowModesModel, GridToolbarContainer} from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import React from "react";
+import {setTableNewItem} from "../../model/actionCreators.ts";
+import {useDispatch} from "react-redux";
 
 interface EditToolbarProps {
-    setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+    setIsCreateItem: (value: (((prevState: boolean) => boolean) | boolean)) => void
     setRowModesModel: (
         newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
     ) => void;
@@ -12,19 +14,33 @@ interface EditToolbarProps {
 
 
 export const EditToolbar = (props: EditToolbarProps) => {
-    const { setRows, setRowModesModel } = props;
+    const { setRowModesModel, setIsCreateItem, isCreateItem } = props;
+    const dispatch = useDispatch()
 
     const handleClick = () => {
-        setRows((oldRows) => [...oldRows, { id: 0, name: '', age: '', isNew: true }]);
+        const id = new Date().toString()
+        dispatch(setTableNewItem({
+            id: id,
+            companySigDate: "",
+            companySignatureName: "",
+            documentName: "",
+            documentStatus: "",
+            documentType: "",
+            employeeNumber: "",
+            employeeSigDate: "",
+            employeeSignatureName: "",
+            isNew: true
+        }))
         setRowModesModel((oldModel) => ({
             ...oldModel,
-            [0]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+            [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
         }));
+        setIsCreateItem(true)
     };
 
     return (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+            <Button color="primary" startIcon={<AddIcon />} disabled={isCreateItem} onClick={handleClick}>
                 Add record
             </Button>
         </GridToolbarContainer>

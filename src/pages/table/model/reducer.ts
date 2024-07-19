@@ -25,10 +25,9 @@ export const tableReducer = produce((draft: Draft<ITableState>, action: ILoginAc
             })
             break;
         case TableActionsType.SET_TABLE_NEW_ITEM:
-            draft.data.splice(0, 0, action.payload)
+            draft.data = [...draft.data, action.payload]
             break;
         case TableActionsType.DELETE_TABLE_ITEM:
-            console.log('fafw')
             draft.data = draft.data.filter(item => item.id !== action.payload)
             break;
         default:

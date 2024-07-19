@@ -1,11 +1,12 @@
 export type TableItemType = {
     id?: string
-    companySigDate: Date
+    companySigDate: Date | string
     companySignatureName: string
     documentName: string
     documentStatus: string
     documentType: string
     employeeNumber: string
-    employeeSigDate: Date
+    employeeSigDate: Date | string
     employeeSignatureName: string
+    isNew?: boolean
 }
